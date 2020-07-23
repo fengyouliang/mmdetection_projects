@@ -4,12 +4,23 @@ import os
 import os.path as osp
 import time
 
-available_gpu_ids = [3]
+available_gpu_ids = [2]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
-# config
+# config X-RAY
 # config_path = '../configs/x_ray/base_faster.py'
-config_path = '../configs/x_ray/base_faster_r101x.py'
+# config_path = '../configs/x_ray/base_faster_r101x.py'
+# config_path = '../configs/x_ray/base_atss.py'
+# config_path = '../configs/x_ray/base_atss_101.py'
+# config_path = '../configs/x_ray/base_faster_mdconv_c3-c5.py'
+config_path = '../configs/x_ray/base_faster_senet_154.py'
+
+# config VIDEO-AD
+# config_path = '../configs/video_ad/base_faster_r101x.py'
+
+# config WHEAT
+# config_path = '../configs/wheat/cascade_r101_64_4d.py'
+
 
 import mmcv
 import torch
@@ -21,6 +32,7 @@ from mmdet.apis import set_random_seed, train_detector
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 from mmdet.utils import collect_env, get_root_logger
+import module
 
 
 def parse_args(settings=None):
@@ -98,7 +110,13 @@ def main():
         cfg.work_dir = args.work_dir
     elif cfg.get('work_dir', None) is None:
         # use config filename as default work_dir if cfg.work_dir is None
-        cfg.work_dir = osp.join('../work_dirs', osp.splitext(osp.basename(args.config))[0])
+        # cfg.work_dir = osp.join('../work_dirs', osp.splitext(osp.basename(args.config))[0])
+        from pathlib import Path
+        p = Path(args.config)
+        path_1 = p.parent.name
+        path_2 = p.stem
+        # cfg.work_dir = osp.join('../work_dirs', f'{path_1}/{path_2}')
+        cfg.work_dir = osp.join('/fengyouliang/model_output/work_dirs', f'{path_1}/{path_2}')
     if args.resume_from is not None:
         cfg.resume_from = args.resume_from
     if args.gpu_ids is not None:

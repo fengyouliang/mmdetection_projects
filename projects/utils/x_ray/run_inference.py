@@ -1,12 +1,19 @@
 import json
 import os
-
 from tqdm import tqdm
 
 available_gpu_ids = [1]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 from mmdet.apis import init_detector, inference_detector
+
+
+def main():
+    model_path = '/fengyouliang/model_output/work_dirs_multi/x_ray/cascade_r101_64_4d_345'
+    model_type = model_path.split('/')[-1]
+    is_multi = 'multi' in model_path
+
+    run_submission(model_type, is_multi)
 
 
 def submission_test(config_file, checkpoint_file, test_path, save_path, save_name):
@@ -34,13 +41,26 @@ def submission_test(config_file, checkpoint_file, test_path, save_path, save_nam
     json.dump(results, open(dump_, 'w'), ensure_ascii=False, indent=4)
 
 
-def main():
-    config_file = '../../configs/x_ray/base_faster.py'
-    checkpoint_file = '../../work_dirs/base_faster/epoch_12.pth'
+def run_submission(model_type, is_multi):
+    project = 'x_ray'
+    # model_type = 'cascade_r101_64_4d_345'  # config file basename
+
+    config_file = f'../../configs/x_ray/{model_type}.py'
+
+    if is_multi:
+        checkpoint_file = f'/fengyouliang/model_output/work_dirs_multi/{project}/{model_type}/latest.pth'
+    else:
+        checkpoint_file = f'/fengyouliang/model_output/work_dirs/{project}/{model_type}/latest.pth'
+
     test_path = '/fengyouliang/datasets/x-ray/test1'
 
-    save_path = '/workspace/projects/submission/x_ray'
-    save_name = 'base_faster'
+    save_path = f'/workspace/projects/submission/{project}'
+    save_name = f'{model_type}'
+
+    vis_save_path = f'../../vis_show/{project}/{model_type}'
+
+    os.makedirs(save_path, exist_ok=True)
+    os.makedirs(vis_save_path, exist_ok=True)
 
     submission_test(config_file, checkpoint_file, test_path, save_path, save_name)
 
