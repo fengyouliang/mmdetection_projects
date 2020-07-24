@@ -2,14 +2,14 @@ import json
 import os
 from tqdm import tqdm
 
-available_gpu_ids = [1]
+available_gpu_ids = [0]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 from mmdet.apis import init_detector, inference_detector
 
 
 def main():
-    model_path = '/fengyouliang/model_output/work_dirs_multi/x_ray/cascade_r101_64_4d_345'
+    model_path = '/fengyouliang/model_output/work_dirs_multi/x_ray/base_faster_mdconv_c3-c5'
     model_type = model_path.split('/')[-1]
     is_multi = 'multi' in model_path
 

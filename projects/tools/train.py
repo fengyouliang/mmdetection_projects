@@ -4,7 +4,7 @@ import os
 import os.path as osp
 import time
 
-available_gpu_ids = [2]
+available_gpu_ids = [0]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 # config X-RAY
@@ -13,7 +13,8 @@ os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids))
 # config_path = '../configs/x_ray/base_atss.py'
 # config_path = '../configs/x_ray/base_atss_101.py'
 # config_path = '../configs/x_ray/base_faster_mdconv_c3-c5.py'
-config_path = '../configs/x_ray/base_faster_senet_154.py'
+# config_path = '../configs/x_ray/base_faster_senet_154.py'
+config_path = '../configs/x_ray/base_faster_mosaic.py'
 
 # config VIDEO-AD
 # config_path = '../configs/video_ad/base_faster_r101x.py'
