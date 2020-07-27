@@ -159,7 +159,9 @@ data = dict(
         classes=classes,
         ann_file=data_root + f'annotations/fold{fold_index}/train.json',
         img_prefix=data_root + 'images/',
-        pipeline=train_pipeline),
+        pipeline=train_pipeline,
+        mosaic_ratio=0.5
+    ),
     val=dict(
         type=dataset_type,
         classes=classes,

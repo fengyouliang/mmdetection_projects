@@ -1,0 +1,3 @@
+[submodule "third_party/WBF"]
+	path = third_party/WBF
+	url = https://github.com/ZFTurbo/Weighted-Boxes-Fusion.git

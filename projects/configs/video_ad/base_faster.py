@@ -1,19 +1,4 @@
-classes = (
-    'boat',
-    'hat',
-    'mouse',
-    'tv',
-    'skateboard',
-    'laptop',
-    'wineglass',
-    'bicycle',
-    'refrigerator',
-    'toilet',
-    'bus',
-    'watch',
-    'dog',
-    'umbrella'
-)
+classes = ('boat', 'hat', 'mouse', 'tv', 'skateboard', 'laptop', 'wineglass', 'bicycle', 'refrigerator', 'toilet', 'bus', 'watch', 'dog', 'umbrella')
 
 fp16 = dict(loss_scale=512.)
 

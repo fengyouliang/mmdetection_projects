@@ -9,7 +9,7 @@ from mmdet.apis import init_detector, inference_detector
 
 
 def main():
-    model_path = '/fengyouliang/model_output/work_dirs_multi/x_ray/base_faster_mdconv_c3-c5'
+    model_path = '/fengyouliang/model_output/work_dirs/x_ray/base_faster_mosaic'
     model_type = model_path.split('/')[-1]
     is_multi = 'multi' in model_path
 
