@@ -6,12 +6,13 @@ num_classes = len(classes)
 batch_size = 8
 fold_index = 0
 
-pretrained = '/fengyouliang/pth/faster_rcnn_r50_fpn_dconv_c3-c5_1x_coco_20200130-d68aed1e.pth'
+# pretrained = '/fengyouliang/pth/faster_rcnn_r50_fpn_dconv_c3-c5_1x_coco_20200130-d68aed1e.pth'
+pretrained = None
 
 model = dict(
     type='FasterRCNN',
-    # pretrained='torchvision://resnet50',
-    pretrained=None,
+    pretrained='torchvision://resnet50',
+    # pretrained=None,
     backbone=dict(
         type='ResNet',
         depth=50,

@@ -4,11 +4,11 @@ import os
 import os.path as osp
 import time
 
-available_gpu_ids = [0]
+available_gpu_ids = [1]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 # config X-RAY
-# config_path = '../configs/x_ray/base_faster.py'
+# config_path = '../configs/x_ray/base_faster. py'
 # config_path = '../configs/x_ray/base_faster_r101x.py'
 # config_path = '../configs/x_ray/base_atss.py'
 # config_path = '../configs/x_ray/base_atss_101.py'
@@ -33,6 +33,9 @@ from mmdet.apis import set_random_seed, train_detector
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 from mmdet.utils import collect_env, get_root_logger
+# print(os.getcwd())
+import sys
+sys.path.append('/workspace')
 import module
 
 

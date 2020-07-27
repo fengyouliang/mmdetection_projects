@@ -15,6 +15,7 @@ from skimage import img_as_ubyte
 @PIPELINES.register_module()
 class LoadMosaicImageAndAnnotations(object):
     def __init__(self, image_shape,
+                 not_m_size,
                  to_float32=False,
                  color_type='color',
                  file_client_args=dict(backend='disk'),
@@ -46,26 +47,22 @@ class LoadMosaicImageAndAnnotations(object):
         self.skip_box_w = skip_box_w
         self.skip_box_h = skip_box_h
         self.image_shape = image_shape
+        self.not_m_size = not_m_size  # for not mosaic image to resize, is align to resize config(image_scale)
 
     def __call__(self, results):
         if len(results) == 1:
             results = self._load_image_annotations(results, 0)
         if len(results) == 4:
-            results = self._load_mosaic_image_and_annotations(results)
+            results = self._load_mosaic_image_annotations(results)
         return results
 
-    def _load_mosaic_image_and_annotations(self, results):
+    def _load_mosaic_image_annotations(self, results):
         indexes = [0, 1, 2, 3]
         result_boxes = []
         results_c = copy.deepcopy(results)
         results = results[0]
-        imsize = self.image_shape[0]
-        # print(imsize)
-        w, h = self.image_shape[0], self.image_shape[1]
-        # s = imsize // 2
-        s = imsize
+        s = self.image_shape
         xc, yc = [int(random.uniform(s * 2 * 0.4, s * 2 * 0.6)) for _ in range(2)]  # center x, y
-        # print(f"xc: {xc}, yc: {yc}")
 
         for i, index in enumerate(indexes):
             result = self._load_image_annotations(results_c, index)
@@ -76,8 +73,8 @@ class LoadMosaicImageAndAnnotations(object):
             # result_masks.append(result['gt_masks'])
             labels = result['gt_labels']
 
-            # labels = labels.reshape(-1, 1)
-            # boxs_labels = np.concatenate([boxes, labels], axis=1)
+            labels = labels.reshape(-1, 1)
+            boxs_labels = np.concatenate([boxes, labels], axis=1)
 
             # TODO: show original image and annotations
             # plt.imshow(image.astype(np.uint8))
@@ -100,10 +97,11 @@ class LoadMosaicImageAndAnnotations(object):
                 x1a, y1a, x2a, y2a = xc, yc, min(xc + w, s * 2), min(s * 2, yc + h)
                 x1b, y1b, x2b, y2b = 0, 0, min(w, x2a - x1a), min(y2a - y1a, h)
 
-            origin_wh = [x2b - x1b, y2b - y1b]
-            mosaic_wh = [x2a - x1a, y2a - y1a]
+            # origin_wh = [x2b - x1b, y2b - y1b]
+            # mosaic_wh = [x2a - x1a, y2a - y1a]
             # print(origin_wh)
             # print(mosaic_wh)
+
             result_image[y1a:y2a, x1a:x2a] = image[y1b:y2b, x1b:x2b]  # result_image[ymin:ymax, xmin:xmax]
 
             # print('xmin, ymin, xmax, ymax')
@@ -113,15 +111,21 @@ class LoadMosaicImageAndAnnotations(object):
             padw = x1a - x1b
             padh = y1a - y1b
 
-            boxes[:, 0] += padw
-            boxes[:, 1] += padh
-            boxes[:, 2] += padw
-            boxes[:, 3] += padh
+            # boxes[:, 0] += padw
+            # boxes[:, 1] += padh
+            # boxes[:, 2] += padw
+            # boxes[:, 3] += padh
 
-            result_boxes.append(boxes)
+            boxs_labels[:, 0] += padw
+            boxs_labels[:, 1] += padh
+            boxs_labels[:, 2] += padw
+            boxs_labels[:, 3] += padh
+
+            result_boxes.append(boxs_labels)
 
         result_boxes = np.concatenate(result_boxes, 0)
-        np.clip(result_boxes[:, 0:], 0, 2 * s, out=result_boxes[:, 0:])
+        # np.clip(result_boxes[:, 0:], 0, 2 * s, out=result_boxes[:, 0:])
+        np.clip(result_boxes[:, 0:-1], 0, 2 * s, out=result_boxes[:, 0:-1])
         result_boxes = result_boxes
         result_boxes = result_boxes[
             np.where((result_boxes[:, 2] - result_boxes[:, 0]) > self.skip_box_w)]
@@ -137,9 +141,14 @@ class LoadMosaicImageAndAnnotations(object):
 
         # results = self._load_image_boxes(results, 0)
 
-        results['ann_info']['bboxes'] = result_boxes
-        result_labels = np.zeros(len(result_boxes), dtype=np.long)
-        results['ann_info']['labels'] = result_labels
+        boxes, labels = np.split(result_boxes, [4], axis=1)
+        assert boxes.shape[-1] == 4
+        assert boxes.shape[0] == labels.shape[0]
+
+        results['ann_info']['bboxes'] = boxes.astype(np.float32)
+        # result_labels = np.zeros(len(result_boxes), dtype=np.long)
+        results['ann_info']['labels'] = labels.reshape(-1).astype(np.int64)
+        results['ann_info']['gt_bboxes_ignore'] = results_c[0]['ann_info']['bboxes_ignore']
 
         masks = []
         for box in result_boxes:
@@ -189,6 +198,7 @@ class LoadMosaicImageAndAnnotations(object):
             results = self._load_masks(results)
         if self.with_seg:
             results = self._load_semantic_seg(results)
+
         return results
 
     def _load_image_annotations(self, results, k):
@@ -214,7 +224,10 @@ class LoadMosaicImageAndAnnotations(object):
         results['ori_shape'] = img.shape
         # Set initial values for default meta_keys
         results['pad_shape'] = img.shape
-        results['scale_factor'] = 1.0
+
+        # results['scale_factor'] = 1.0
+        results['scale'] = self.not_m_size
+
         num_channels = 1 if len(img.shape) < 3 else img.shape[2]
         results['img_norm_cfg'] = dict(
             mean=np.zeros(num_channels, dtype=np.float32),

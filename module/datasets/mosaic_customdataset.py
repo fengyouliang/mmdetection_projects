@@ -57,8 +57,7 @@ class Mosaic_CustomDataset(Dataset):
                  proposal_file=None,
                  test_mode=False,
                  filter_empty_gt=True,
-                 mosaic=True,
-                 mosaic_ratio=1.0
+                 mosaic_ratio=0.5
                  ):
         self.ann_file = ann_file
         self.data_root = data_root
@@ -69,7 +68,6 @@ class Mosaic_CustomDataset(Dataset):
         self.filter_empty_gt = filter_empty_gt
         self.CLASSES = self.get_classes(classes)
 
-        self.mosaic = mosaic
         self.mosaic_ratio = mosaic_ratio
 
         # join paths if data_root is specified
@@ -207,8 +205,7 @@ class Mosaic_CustomDataset(Dataset):
                 introduced by pipeline.
         """
         final_results = []
-        mosaic = True
-        if mosaic:
+        if self.mosaic_ratio > np.random.random():
             indics = [idx] + [np.random.randint(0, len(self.data_infos) - 1) for _ in range(3)]
             for id in indics:
                 img_info = self.data_infos[id]
