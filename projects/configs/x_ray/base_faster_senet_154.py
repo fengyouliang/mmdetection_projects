@@ -3,14 +3,14 @@ classes = ('knife', 'scissors', 'lighter', 'zippooil', 'pressure', 'slingshot', 
 fp16 = dict(loss_scale=512.)
 
 num_classes = len(classes)
-batch_size = 6
+batch_size = 1
 fold_index = 0
 
 pretrained = None
 
 model = dict(
     type='FasterRCNN',
-    pretrained='https://data.lip6.fr/cadene/pretrainedmodels/senet154-c7b49a05.pth',
+    pretrained='/fengyouliang/pth/backbone/senet/senet154-c7b49a05.pth',
     backbone=dict(
         type='SENet',
         block='SEBottleneck',
@@ -173,7 +173,7 @@ data = dict(
 evaluation = dict(interval=1, metric='bbox')
 
 # optimizer
-optimizer = dict(type='SGD', lr=0.002, momentum=0.9, weight_decay=0.0001)
+optimizer = dict(type='SGD', lr=0.0002, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(

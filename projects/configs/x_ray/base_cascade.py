@@ -6,7 +6,7 @@ num_classes = len(classes)
 batch_size = 8
 fold_index = 0
 
-pretrained = '/fengyouliang/pth/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth'
+pretrained = '/fengyouliang/pth/cascade/cascade_rcnn_r50_fpn_20e_coco_bbox_mAP-0.41_20200504_175131-e9872a90.pth'
 
 # model settings
 model = dict(
@@ -243,7 +243,7 @@ data = dict(
         ann_file=data_root + f'annotations/fold{fold_index}/val.json',
         img_prefix=data_root + 'images/',
         pipeline=test_pipeline))
-evaluation = dict(interval=1, metric='bbox')
+evaluation = dict(interval=1, metric='bbox', classwise=True)
 
 # optimizer
 optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)
@@ -254,8 +254,8 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[8, 11])
-total_epochs = 12
+    step=[16, 22])
+total_epochs = 24
 
 checkpoint_config = dict(interval=1)
 # yapf:disable
@@ -263,7 +263,7 @@ log_config = dict(
     interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
-        # dict(type='TensorboardLoggerHook')
+        dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
 dist_params = dict(backend='nccl')

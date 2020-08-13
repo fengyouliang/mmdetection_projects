@@ -1,12 +1,12 @@
 import argparse
 import os
 
-available_gpu_ids = [2]
+available_gpu_ids = [0]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 settings = [
-    '../configs/huatian/base_faster.py',
-    '../work_dirs/base_faster/epoch_12.pth',
+    '../configs/x_ray/base_faster.py',
+    '/fengyouliang/model_output/work_dirs_multi/x_ray/base_faster/latest.pth',
     # '--out', 'huatian_benchmark.pkl',
     '--eval', 'bbox'
 ]

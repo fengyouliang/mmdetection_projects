@@ -4,18 +4,36 @@ import os
 import os.path as osp
 import time
 
-available_gpu_ids = [0]
+available_gpu_ids = [1]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 # config X-RAY
-# config_path = '../configs/x_ray/base_faster. py'
+# Done
+# config_path = '../configs/x_ray/base_faster.py'
 # config_path = '../configs/x_ray/base_faster_r101x.py'
-# config_path = '../configs/x_ray/base_atss.py'
+# config_path = '../configs/x_ray/base_faster_r101x_mosaic.py'
 # config_path = '../configs/x_ray/base_atss_101.py'
 # config_path = '../configs/x_ray/base_faster_mdconv_c3-c5.py'
-# config_path = '../configs/x_ray/base_faster_senet_154.py'
+# config_path = '../configs/x_ray/base_faster_r101x_c3-c5_mosaic.py'
+# config_path = '../configs/x_ray/base_faster_r101x_c3-c5_mosaic_aug.py'
+# config_path = '../configs/x_ray/base_faster_senet_154_demo.py'
 # config_path = '../configs/x_ray/base_faster_mosaic.py'
-config_path = '../configs/x_ray/fcos.py'
+# config_path = '../configs/x_ray/fcos.py'
+# config_path = '../configs/x_ray/fcos_from_wheat.py'
+# config_path = '../configs/x_ray/base_cascade_x101.py'
+# config_path = '../configs/x_ray/detectors_mosaic.py'
+# config_path = '../configs/x_ray/base_faster_dh_gn_ws.py'
+# config_path = '../configs/x_ray/base_atss.py'
+# config_path = '../configs/x_ray/base_faster_dh_gn.py'
+# config_path = '../configs/x_ray/base_gfl_101x.py'
+# config_path = '../configs/x_ray/base_cascade.py'
+# config_path = '../configs/x_ray/base_cascade_cb.py'
+
+# TODO
+config_path = '../configs/x_ray/base_gfl_101x.py'
+# config_path = '../configs/x_ray/cascade_mask_rcnn_x101_32x4d_fpn_dconv_c3-c5.py'
+# config_path = '../configs/x_ray/cascade_mask_rcnn_x101_32x4d_fpn_syncbn-backbone_r4_gcb_c3-c5_4x.py'
+
 
 # config VIDEO-AD
 # config_path = '../configs/video_ad/base_faster_r101x.py'
@@ -35,7 +53,6 @@ from mmdet.apis import set_random_seed, train_detector
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 from mmdet.utils import collect_env, get_root_logger
-# print(os.getcwd())
 import sys
 sys.path.append('/workspace')
 import module
@@ -101,9 +118,6 @@ def main():
     args = parse_args(settings)
     cfg = Config.fromfile(args.config)
 
-    # cfg.model.pretrained = '/home/yanqing/data/pretrained_model/mmdetection/resnet50_msra-5891d200.pth'
-    # cfg.evaluation['interval_iter'] = 1
-
     if args.options is not None:
         cfg.merge_from_dict(args.options)
     # set cudnn_benchmark
@@ -119,8 +133,8 @@ def main():
         # cfg.work_dir = osp.join('../work_dirs', osp.splitext(osp.basename(args.config))[0])
         from pathlib import Path
         p = Path(args.config)
-        path_1 = p.parent.name
-        path_2 = p.stem
+        path_1 = p.parent.name  # project name
+        path_2 = p.stem  # config name
         # cfg.work_dir = osp.join('../work_dirs', f'{path_1}/{path_2}')
         cfg.work_dir = osp.join('/fengyouliang/model_output/work_dirs', f'{path_1}/{path_2}')
     if args.resume_from is not None:

@@ -6,7 +6,7 @@ num_classes = len(classes)
 batch_size = 2
 fold_index = 0
 
-pretrained = '/fengyouliang/pth/faster_rcnn_x101_64x4d_fpn_1x_coco_20200204-833ee192.pth'
+pretrained = '/fengyouliang/pth/faster/faster_rcnn_x101_64x4d_fpn_1x_coco_20200204-833ee192.pth'
 
 model = dict(
     type='FasterRCNN',

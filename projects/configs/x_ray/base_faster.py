@@ -1,12 +1,10 @@
-classes = ('knife', 'scissors', 'lighter', 'zippooil', 'pressure', 'slingshot', 'handcuffs', 'nailpolish', 'powerbank', 'firecrackers')
-
 fp16 = dict(loss_scale=512.)
-
+classes = ('knife', 'scissors', 'lighter', 'zippooil', 'pressure', 'slingshot', 'handcuffs', 'nailpolish', 'powerbank', 'firecrackers')
 num_classes = len(classes)
 batch_size = 8
 fold_index = 0
 
-pretrained = '/fengyouliang/pth/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth'
+pretrained = '/fengyouliang/pth/faster/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth'
 
 model = dict(
     type='FasterRCNN',
@@ -113,9 +111,10 @@ test_cfg = dict(
         nms_thr=0.7,
         min_bbox_size=0),
     rcnn=dict(
-        score_thr=0.05,
-        nms=dict(type='nms', iou_threshold=0.5),
-        max_per_img=100)
+        score_thr=0.001,
+        # nms=dict(type='nms', iou_threshold=0.5),
+        nms=dict(type='soft_nms', iou_threshold=0.5, min_score=0.001),
+        max_per_img=200)
     # soft-nms is also supported for rcnn testing
     # e.g., nms=dict(type='soft_nms', iou_threshold=0.5, min_score=0.05)
 )
@@ -170,7 +169,7 @@ data = dict(
         ann_file=data_root + f'annotations/fold{fold_index}/val.json',
         img_prefix=data_root + 'images/',
         pipeline=test_pipeline))
-evaluation = dict(interval=1, metric='bbox')
+evaluation = dict(interval=1, metric='bbox', classwise=True)
 
 # optimizer
 optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)

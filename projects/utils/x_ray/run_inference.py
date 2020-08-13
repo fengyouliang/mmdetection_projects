@@ -5,18 +5,45 @@ from tqdm import tqdm
 available_gpu_ids = [0]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
-from mmdet.apis import init_detector, inference_detector
-
 
 def main():
-    model_path = '/fengyouliang/model_output/work_dirs/x_ray/base_faster_mosaic'
+    model_path = '/fengyouliang/model_output/work_dirs/x_ray/base_faster_r101x_c3-c5_mosaic_aug'
     model_type = model_path.split('/')[-1]
     is_multi = 'multi' in model_path
 
-    run_submission(model_type, is_multi)
+    run_submission(model_type, is_multi, epoch_name='latest')
+
+
+def run_submission(model_type, is_multi, epoch_name='latest'):
+    project = 'x_ray'
+
+    config_file = f'../../configs/x_ray/{model_type}.py'
+    if is_multi:
+        checkpoint_file = f'/fengyouliang/model_output/work_dirs_multi/{project}/{model_type}/{epoch_name}.pth'
+    else:
+        checkpoint_file = f'/fengyouliang/model_output/work_dirs/{project}/{model_type}/{epoch_name}.pth'
+
+    assert os.path.isfile(config_file), config_file
+    assert os.path.isfile(checkpoint_file), checkpoint_file
+
+    test_path = '/fengyouliang/datasets/x-ray/test1'
+
+    save_path = f'/workspace/projects/submission/{project}'
+    save_name = f'{model_type}_tta-flip'
+
+    vis_save_path = f'../../vis_show/{project}/{model_type}'
+
+    os.makedirs(save_path, exist_ok=True)
+    os.makedirs(vis_save_path, exist_ok=True)
+
+    print(f"run in config: {config_file}")
+    print(f"run in checkpoint: {checkpoint_file}")
+    submission_test(config_file, checkpoint_file, test_path, save_path, save_name)
 
 
 def submission_test(config_file, checkpoint_file, test_path, save_path, save_name):
+    from mmdet.apis import init_detector, inference_detector
+
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
 
     results = []
@@ -39,30 +66,7 @@ def submission_test(config_file, checkpoint_file, test_path, save_path, save_nam
 
     dump_ = f'{save_path}/{save_name}.json'
     json.dump(results, open(dump_, 'w'), ensure_ascii=False, indent=4)
-
-
-def run_submission(model_type, is_multi):
-    project = 'x_ray'
-    # model_type = 'cascade_r101_64_4d_345'  # config file basename
-
-    config_file = f'../../configs/x_ray/{model_type}.py'
-
-    if is_multi:
-        checkpoint_file = f'/fengyouliang/model_output/work_dirs_multi/{project}/{model_type}/latest.pth'
-    else:
-        checkpoint_file = f'/fengyouliang/model_output/work_dirs/{project}/{model_type}/latest.pth'
-
-    test_path = '/fengyouliang/datasets/x-ray/test1'
-
-    save_path = f'/workspace/projects/submission/{project}'
-    save_name = f'{model_type}'
-
-    vis_save_path = f'../../vis_show/{project}/{model_type}'
-
-    os.makedirs(save_path, exist_ok=True)
-    os.makedirs(vis_save_path, exist_ok=True)
-
-    submission_test(config_file, checkpoint_file, test_path, save_path, save_name)
+    print(dump_)
 
 
 if __name__ == '__main__':

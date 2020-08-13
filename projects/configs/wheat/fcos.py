@@ -1,4 +1,4 @@
-classes = ('wheat',)
+classes = ('wheat', )
 
 fp16 = dict(loss_scale=512.)
 
@@ -9,7 +9,8 @@ pretrained = None
 
 model = dict(
     type='FCOS',
-    pretrained='open-mmlab://resnext101_64x4d',
+    # pretrained='open-mmlab://resnext101_64x4d',
+    pretrained='/fengyouliang/pth/backbone/resnext101_64x4d-ee2c6f71.pth',
     backbone=dict(
         type='ResNeXt',
         depth=101,

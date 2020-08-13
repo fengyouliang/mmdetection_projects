@@ -224,7 +224,8 @@ class SENet(nn.Module):
 
     def __init__(self, block, layers, groups, reduction, dropout_p=0.2,
                  inplanes=128, input_3x3=True, downsample_kernel_size=3,
-                 downsample_padding=1, num_classes=1000):
+                 downsample_padding=1, num_classes=1000, frozen_stages=-1,
+                 norm_eval=True,):
         """
         Parameters
         ----------
@@ -271,6 +272,9 @@ class SENet(nn.Module):
         super(SENet, self).__init__()
         self.inplanes = inplanes
         self.dcn = None
+        self.frozen_stages = -1
+        self.norm_eval = norm_eval
+
         block = SE_BLOCK.get(block)
         if input_3x3:
             layer0_modules = [
@@ -338,9 +342,9 @@ class SENet(nn.Module):
             downsample_kernel_size=downsample_kernel_size,
             downsample_padding=downsample_padding
         )
-        self.avg_pool = nn.AvgPool2d(7, stride=1)
-        self.dropout = nn.Dropout(dropout_p) if dropout_p is not None else None
-        self.last_linear = nn.Linear(512 * block.expansion, num_classes)
+        # self.avg_pool = nn.AvgPool2d(7, stride=1)
+        # self.dropout = nn.Dropout(dropout_p) if dropout_p is not None else None
+        # self.last_linear = nn.Linear(512 * block.expansion, num_classes)
 
     def _make_layer(self, block, planes, blocks, groups, reduction, stride=1,
                     downsample_kernel_size=1, downsample_padding=0):
@@ -361,6 +365,36 @@ class SENet(nn.Module):
             layers.append(block(self.inplanes, planes, groups, reduction))
 
         return nn.Sequential(*layers)
+
+    # def _freeze_stages(self):
+    #     if self.frozen_stages >= 0:
+    #         for m in [self.layer0]:
+    #             m.eval()
+    #             for param in m.parameters():
+    #                 param.requires_grad = False
+    #     for i in range(1, self.frozen_stages + 1):
+    #         m = getattr(self, 'layer{}'.format(i))
+    #         m.eval()
+    #         for param in m.parameters():
+    #             param.requires_grad = False
+
+    def _freeze_stages(self):
+        if self.frozen_stages >= 0:
+            if self.deep_stem:
+                self.stem.eval()
+                for param in self.stem.parameters():
+                    param.requires_grad = False
+            else:
+                self.norm1.eval()
+                for m in [self.conv1, self.norm1]:
+                    for param in m.parameters():
+                        param.requires_grad = False
+
+        for i in range(1, self.frozen_stages + 1):
+            m = getattr(self, f'layer{i}')
+            m.eval()
+            for param in m.parameters():
+                param.requires_grad = False
 
     def init_weights(self, pretrained=None):
 
@@ -395,18 +429,30 @@ class SENet(nn.Module):
         ret.append(x)
         return ret, x
 
-    def logits(self, x):
-        x = self.avg_pool(x)
-        if self.dropout is not None:
-            x = self.dropout(x)
-        x = x.view(x.size(0), -1)
-        x = self.last_linear(x)
-        return x
+    # def logits(self, x):
+    #     x = self.avg_pool(x)
+    #     if self.dropout is not None:
+    #         x = self.dropout(x)
+    #     x = x.view(x.size(0), -1)
+    #     x = self.last_linear(x)
+    #     return x
 
     def forward(self, x):
         ret, x = self.features(x)
         # x = self.logits(x)
         return ret
+
+    def train(self, mode=True):
+        """Convert the model into training mode while keep normalization layer
+        freezed."""
+        super(SENet, self).train(mode)
+        self._freeze_stages()
+        if mode and self.norm_eval:
+            for m in self.modules():
+                # trick: eval have effect on BatchNorm only
+                if isinstance(m, _BatchNorm):
+                    m.eval()
+
 
 
 def initialize_pretrained_model(model, num_classes, settings):

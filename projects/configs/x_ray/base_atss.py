@@ -1,12 +1,10 @@
-classes = ('knife', 'scissors', 'lighter', 'zippooil', 'pressure', 'slingshot', 'handcuffs', 'nailpolish', 'powerbank', 'firecrackers')
-
 fp16 = dict(loss_scale=512.)
-
+classes = ('knife', 'scissors', 'lighter', 'zippooil', 'pressure', 'slingshot', 'handcuffs', 'nailpolish', 'powerbank', 'firecrackers')
 num_classes = len(classes)
 batch_size = 8
 fold_index = 0
 
-pretrained = None
+pretrained = '/fengyouliang/pth/atss/atss_r50_fpn_1x_coco_20200209-985f7bd0.pth'
 
 model = dict(
     type='ATSS',
@@ -127,7 +125,7 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[16, 22])
+    step=[16, 22, 28])
 total_epochs = 30
 
 checkpoint_config = dict(interval=1)
