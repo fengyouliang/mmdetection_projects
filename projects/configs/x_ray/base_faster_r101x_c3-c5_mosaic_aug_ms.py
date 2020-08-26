@@ -188,7 +188,7 @@ test_pipeline = [
     dict(
         type='MultiScaleFlipAug',
         img_scale=[(1333, 480), (1333, 800)],
-        flip=False,
+        flip=True,
         transforms=[
             dict(type='Resize', keep_ratio=True),
             dict(type='RandomFlip'),
@@ -230,8 +230,8 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[16, 22])
-total_epochs = 30
+    step=[32, 44])
+total_epochs = 48
 
 checkpoint_config = dict(interval=1)
 # yapf:disable
@@ -239,7 +239,7 @@ log_config = dict(
     interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
-        # dict(type='TensorboardLoggerHook')
+        dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
 dist_params = dict(backend='nccl')

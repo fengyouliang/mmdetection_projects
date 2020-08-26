@@ -50,9 +50,9 @@ wheat_top1_transforms = [
             ),
             dict(
                 type='HueSaturationValue',
-                hue_shift_limit=20,
-                sat_shift_limit=30,
-                val_shift_limit=20,
+                hue_shift_limit=0.68,
+                sat_shift_limit=0.68,
+                val_shift_limit=0.1,
                 p=1.0,
             ),
             dict(

@@ -4,44 +4,11 @@ import os
 import os.path as osp
 import time
 
-available_gpu_ids = [1]
+available_gpu_ids = [2]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
-# config X-RAY
-# Done
-# config_path = '../configs/x_ray/base_faster.py'
-# config_path = '../configs/x_ray/base_faster_r101x.py'
-# config_path = '../configs/x_ray/base_faster_r101x_mosaic.py'
-# config_path = '../configs/x_ray/base_atss_101.py'
-# config_path = '../configs/x_ray/base_faster_mdconv_c3-c5.py'
-# config_path = '../configs/x_ray/base_faster_r101x_c3-c5_mosaic.py'
-# config_path = '../configs/x_ray/base_faster_r101x_c3-c5_mosaic_aug.py'
-# config_path = '../configs/x_ray/base_faster_senet_154_demo.py'
-# config_path = '../configs/x_ray/base_faster_mosaic.py'
-# config_path = '../configs/x_ray/fcos.py'
-# config_path = '../configs/x_ray/fcos_from_wheat.py'
-# config_path = '../configs/x_ray/base_cascade_x101.py'
-# config_path = '../configs/x_ray/detectors_mosaic.py'
-# config_path = '../configs/x_ray/base_faster_dh_gn_ws.py'
-# config_path = '../configs/x_ray/base_atss.py'
-# config_path = '../configs/x_ray/base_faster_dh_gn.py'
-# config_path = '../configs/x_ray/base_gfl_101x.py'
-# config_path = '../configs/x_ray/base_cascade.py'
-# config_path = '../configs/x_ray/base_cascade_cb.py'
-
-# TODO
-config_path = '../configs/x_ray/base_gfl_101x.py'
-# config_path = '../configs/x_ray/cascade_mask_rcnn_x101_32x4d_fpn_dconv_c3-c5.py'
-# config_path = '../configs/x_ray/cascade_mask_rcnn_x101_32x4d_fpn_syncbn-backbone_r4_gcb_c3-c5_4x.py'
-
-
-# config VIDEO-AD
-# config_path = '../configs/video_ad/base_faster_r101x.py'
-
-# config WHEAT
-# config_path = '../configs/wheat/cascade_r101_64_4d.py'
-# config_path = '../configs/wheat/fcos.py'
-
+# config
+config_path = '../configs/x_ray/cascade/base_cascade.py'
 
 import mmcv
 import torch

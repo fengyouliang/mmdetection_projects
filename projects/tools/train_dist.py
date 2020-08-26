@@ -5,7 +5,7 @@ import os.path as osp
 import time
 
 
-available_gpu_ids = [2, 3]
+available_gpu_ids = [1, 3]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 import mmcv
@@ -75,9 +75,6 @@ def main():
     args = parse_args()
     cfg = Config.fromfile(args.config)
 
-    # cfg.model.pretrained = '/home/yanqing/data/pretrained_model/mmdetection/resnet50_msra-5891d200.pth'
-    # cfg.evaluation['interval_iter'] = interval_iter
-
     if args.options is not None:
         cfg.merge_from_dict(args.options)
     # set cudnn_benchmark
@@ -90,13 +87,11 @@ def main():
         cfg.work_dir = args.work_dir
     elif cfg.get('work_dir', None) is None:
         # use config filename as default work_dir if cfg.work_dir is None
-        # cfg.work_dir = osp.join('./projects/multi_work_dirs', osp.splitext(osp.basename(args.config))[0])
         from pathlib import Path
         p = Path(args.config)
         path_1 = p.parent.name
         path_2 = p.stem
-        # cfg.work_dir = osp.join('./projects/work_dirs_multi', f'{path_1}/{path_2}')
-        cfg.work_dir = osp.join('/fengyouliang/model_output/work_dirs_multi', f'{path_1}/{path_2}')
+        cfg.work_dir = osp.join('/fengyouliang/model_output/work_dirs', f'{path_1}/{path_2}')
 
     if args.resume_from is not None:
         cfg.resume_from = args.resume_from
