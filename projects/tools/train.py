@@ -4,11 +4,12 @@ import os
 import os.path as osp
 import time
 
-available_gpu_ids = [2]
+available_gpu_ids = [3]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 # config
-config_path = '../configs/x_ray/cascade/base_cascade.py'
+config_path = '../configs/seed/base_faster.py'
+config_path = '../configs/seed/base_cascade.py'
 
 import mmcv
 import torch
@@ -22,7 +23,7 @@ from mmdet.models import build_detector
 from mmdet.utils import collect_env, get_root_logger
 import sys
 sys.path.append('/workspace')
-import module
+import mmdet_module
 
 
 def parse_args(settings=None):
