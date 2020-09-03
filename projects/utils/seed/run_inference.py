@@ -5,13 +5,13 @@ from pathlib import Path
 import numpy as np
 
 
-available_gpu_ids = [1]
+available_gpu_ids = [0]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 
 def main():
-    model_path = '/fengyouliang/model_output/work_dirs/seed/base_cascade'
-    run_submission(model_path, epoch_name='latest')
+    model_path = '/fengyouliang/model_output/mmdet_work_dirs/seed/base_cascade_r101_dcn'
+    run_submission(model_path, epoch_name='epoch_10')
 
 
 def run_submission(model_path, epoch_name='latest'):

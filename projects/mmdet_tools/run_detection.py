@@ -7,9 +7,18 @@ import time
 available_gpu_ids = [3]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
-# config
-config_path = '../configs/seed/base_faster.py'
-config_path = '../configs/seed/base_cascade.py'
+# demo config
+# config_path = '../configs/config_demo/faster_demo.py'
+
+# seed config
+# config_path = '../configs/seed/base_faster.py'
+# config_path = '../configs/seed/base_cascade.py'
+# config_path = '../configs/seed/base_cascade_dcn.py'
+# config_path = '../configs/seed/base_cascade_r101_dcn.py'
+
+# wheat config
+# config_path = '../configs/wheat/base_faster.py'
+config_path = '../configs/wheat/base_cascade.py'
 
 import mmcv
 import torch
@@ -21,6 +30,7 @@ from mmdet.apis import set_random_seed, train_detector
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 from mmdet.utils import collect_env, get_root_logger
+
 import sys
 sys.path.append('/workspace')
 import mmdet_module
@@ -104,7 +114,7 @@ def main():
         path_1 = p.parent.name  # project name
         path_2 = p.stem  # config name
         # cfg.work_dir = osp.join('../work_dirs', f'{path_1}/{path_2}')
-        cfg.work_dir = osp.join('/fengyouliang/model_output/work_dirs', f'{path_1}/{path_2}')
+        cfg.work_dir = osp.join('/fengyouliang/model_output/mmdet_work_dirs', f'{path_1}/{path_2}')
     if args.resume_from is not None:
         cfg.resume_from = args.resume_from
     if args.gpu_ids is not None:

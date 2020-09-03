@@ -1,5 +1,5 @@
 # model settings
-norm_cfg = dict(type='BN', requires_grad=True)
+norm_cfg = dict(type='SyncBN', requires_grad=True)
 model = dict(
     type='EncoderDecoder',
     pretrained=None,
@@ -109,9 +109,9 @@ optimizer_config = dict()
 # learning policy
 lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
 # runtime settings
-total_iters = 20000
-checkpoint_config = dict(by_epoch=False, interval=2000)
-evaluation = dict(interval=2000, metric='mIoU')
+total_iters = 160000
+checkpoint_config = dict(by_epoch=False, interval=16000)
+evaluation = dict(interval=16000, metric='mIoU')
 
 # yapf:disable
 log_config = dict(

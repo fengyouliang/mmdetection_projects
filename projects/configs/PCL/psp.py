@@ -1,5 +1,5 @@
 # model settings
-norm_cfg = dict(type='BN', requires_grad=True)
+norm_cfg = dict(type='SyncBN', requires_grad=True)
 model = dict(
     type='EncoderDecoder',
     pretrained=None,
@@ -15,12 +15,11 @@ model = dict(
         style='pytorch',
         contract_dilation=True),
     decode_head=dict(
-        type='FCNHead',
+        type='PSPHead',
         in_channels=2048,
         in_index=3,
         channels=512,
-        num_convs=2,
-        concat_input=True,
+        pool_scales=(1, 2, 3, 6),
         dropout_ratio=0.1,
         num_classes=8,
         norm_cfg=norm_cfg,
@@ -35,12 +34,11 @@ model = dict(
         num_convs=1,
         concat_input=False,
         dropout_ratio=0.1,
-        num_classes=19,
+        num_classes=8,
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4))
-)
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)))
 # model training and testing settings
 train_cfg = dict()
 test_cfg = dict(mode='whole')
@@ -79,7 +77,7 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=16,
     workers_per_gpu=0,
     train=dict(
         type=dataset_type,
@@ -109,13 +107,13 @@ optimizer_config = dict()
 # learning policy
 lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
 # runtime settings
-total_iters = 20000
-checkpoint_config = dict(by_epoch=False, interval=2000)
-evaluation = dict(interval=2000, metric='mIoU')
+total_iters = 160000
+checkpoint_config = dict(by_epoch=False, interval=160000)
+evaluation = dict(interval=16000, metric='mIoU')
 
 # yapf:disable
 log_config = dict(
-    interval=50,
+    interval=100,
     hooks=[
         dict(type='TextLoggerHook', by_epoch=False),
         dict(type='TensorboardLoggerHook')
@@ -123,7 +121,7 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
+load_from = '/fengyouliang/pth/psp/pspnet_r50-d8_512x512_160k_ade20k_20200615_184358-1890b0bd.pth'
 resume_from = None
 workflow = [('train', 1)]
 cudnn_benchmark = True

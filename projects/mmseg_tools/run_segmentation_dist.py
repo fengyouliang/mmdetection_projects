@@ -4,15 +4,8 @@ import os
 import os.path as osp
 import time
 
-available_gpu_ids = [0]
+available_gpu_ids = [1, 2]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
-
-# demo config
-config_path = '../configs/PCL/fcn_demo.py'
-
-# config
-# config_path = '../configs/PCL/fcn.py'
-# config_path = '../configs/PCL/ocrnet.py'
 
 import mmcv
 import torch
@@ -67,15 +60,7 @@ def parse_args():
         default='none',
         help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
-
-    settings = [
-        config_path,
-        # '--gpu-ids', '0' '1',
-        '--gpus', str(len(available_gpu_ids)),
-        # '--validate',
-    ]
-
-    args = parser.parse_args(settings)
+    args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
 

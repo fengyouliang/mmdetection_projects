@@ -1,46 +1,68 @@
 # model settings
 norm_cfg = dict(type='BN', requires_grad=True)
 model = dict(
-    type='EncoderDecoder',
-    pretrained=None,
+    type='CascadeEncoderDecoder',
+    num_stages=2,
+    pretrained='open-mmlab://msra/hrnetv2_w18',
     backbone=dict(
-        type='ResNetV1c',
-        depth=50,
-        num_stages=4,
-        out_indices=(0, 1, 2, 3),
-        dilations=(1, 1, 2, 4),
-        strides=(1, 2, 1, 1),
+        type='HRNet',
         norm_cfg=norm_cfg,
         norm_eval=False,
-        style='pytorch',
-        contract_dilation=True),
-    decode_head=dict(
-        type='FCNHead',
-        in_channels=2048,
-        in_index=3,
-        channels=512,
-        num_convs=2,
-        concat_input=True,
-        dropout_ratio=0.1,
-        num_classes=8,
-        norm_cfg=norm_cfg,
-        align_corners=False,
-        loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
-    auxiliary_head=dict(
-        type='FCNHead',
-        in_channels=1024,
-        in_index=2,
-        channels=256,
-        num_convs=1,
-        concat_input=False,
-        dropout_ratio=0.1,
-        num_classes=19,
-        norm_cfg=norm_cfg,
-        align_corners=False,
-        loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4))
-)
+        extra=dict(
+            stage1=dict(
+                num_modules=1,
+                num_branches=1,
+                block='BOTTLENECK',
+                num_blocks=(4, ),
+                num_channels=(64, )),
+            stage2=dict(
+                num_modules=1,
+                num_branches=2,
+                block='BASIC',
+                num_blocks=(4, 4),
+                num_channels=(18, 36)),
+            stage3=dict(
+                num_modules=4,
+                num_branches=3,
+                block='BASIC',
+                num_blocks=(4, 4, 4),
+                num_channels=(18, 36, 72)),
+            stage4=dict(
+                num_modules=3,
+                num_branches=4,
+                block='BASIC',
+                num_blocks=(4, 4, 4, 4),
+                num_channels=(18, 36, 72, 144)))),
+    decode_head=[
+        dict(
+            type='FCNHead',
+            in_channels=[18, 36, 72, 144],
+            channels=sum([18, 36, 72, 144]),
+            in_index=(0, 1, 2, 3),
+            input_transform='resize_concat',
+            kernel_size=1,
+            num_convs=1,
+            concat_input=False,
+            dropout_ratio=-1,
+            num_classes=8,
+            norm_cfg=norm_cfg,
+            align_corners=False,
+            loss_decode=dict(
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)),
+        dict(
+            type='OCRHead',
+            in_channels=[18, 36, 72, 144],
+            in_index=(0, 1, 2, 3),
+            input_transform='resize_concat',
+            channels=512,
+            ocr_channels=256,
+            dropout_ratio=-1,
+            num_classes=8,
+            norm_cfg=norm_cfg,
+            align_corners=False,
+            loss_decode=dict(
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
+    ])
 # model training and testing settings
 train_cfg = dict()
 test_cfg = dict(mode='whole')
@@ -79,7 +101,7 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=16,
     workers_per_gpu=0,
     train=dict(
         type=dataset_type,
@@ -109,9 +131,9 @@ optimizer_config = dict()
 # learning policy
 lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
 # runtime settings
-total_iters = 20000
-checkpoint_config = dict(by_epoch=False, interval=2000)
-evaluation = dict(interval=2000, metric='mIoU')
+total_iters = 160000
+checkpoint_config = dict(by_epoch=False, interval=16000)
+evaluation = dict(interval=16000, metric='mIoU')
 
 # yapf:disable
 log_config = dict(

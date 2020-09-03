@@ -4,8 +4,7 @@ import os
 import os.path as osp
 import time
 
-
-available_gpu_ids = [1, 3]
+available_gpu_ids = [2, 3]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 import mmcv
@@ -18,7 +17,10 @@ from mmdet.apis import set_random_seed, train_detector
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 from mmdet.utils import collect_env, get_root_logger
-import module
+
+import sys
+sys.path.append('/workspace')
+import mmdet_module
 
 
 def parse_args(settings=None):
@@ -91,7 +93,7 @@ def main():
         p = Path(args.config)
         path_1 = p.parent.name
         path_2 = p.stem
-        cfg.work_dir = osp.join('/fengyouliang/model_output/work_dirs', f'{path_1}/{path_2}')
+        cfg.work_dir = osp.join('/fengyouliang/model_output/mmdet_work_dirs', f'{path_1}/{path_2}')
 
     if args.resume_from is not None:
         cfg.resume_from = args.resume_from
