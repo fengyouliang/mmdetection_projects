@@ -14,11 +14,11 @@ os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids))
 # config_path = '../configs/seed/base_faster.py'
 # config_path = '../configs/seed/base_cascade.py'
 # config_path = '../configs/seed/base_cascade_dcn.py'
-# config_path = '../configs/seed/base_cascade_r101_dcn.py'
+config_path = '../configs/seed/base_cascade_r101_dcn.py'
 
 # wheat config
 # config_path = '../configs/wheat/base_faster.py'
-config_path = '../configs/wheat/base_cascade.py'
+# config_path = '../configs/wheat/base_cascade.py'
 
 import mmcv
 import torch

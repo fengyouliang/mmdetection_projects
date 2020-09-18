@@ -1,5 +1,5 @@
 # model settings
-norm_cfg = dict(type='SyncBN', requires_grad=True)
+norm_cfg = dict(type='BN', requires_grad=True)
 model = dict(
     type='EncoderDecoder',
     pretrained=None,
@@ -127,7 +127,8 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
+# load_from = '/fengyouliang/pth/deeplabv3p/deeplabv3plus_r50-d8_512x512_160k_ade20k_20200615_124504-6135c7e0.pth'
 load_from = None
-resume_from = None
+resume_from = '/fengyouliang/model_output/mmseg_work_dirs/PCL/deeplabv3p_t0_pretrain/latest.pth'
 workflow = [('train', 1)]
 cudnn_benchmark = True

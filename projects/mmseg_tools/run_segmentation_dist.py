@@ -4,7 +4,7 @@ import os
 import os.path as osp
 import time
 
-available_gpu_ids = [1, 2]
+available_gpu_ids = [0, 3]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 import mmcv

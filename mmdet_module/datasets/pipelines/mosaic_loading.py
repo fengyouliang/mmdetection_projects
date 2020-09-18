@@ -76,7 +76,7 @@ class LoadMosaicImageAndAnnotations(object):
             labels = labels.reshape(-1, 1)
             boxs_labels = np.concatenate([boxes, labels], axis=1)
 
-            # TODO: show original image and annotations
+            # show original image and annotations
             # plt.imshow(image.astype(np.uint8))
             # for box in boxes:
             #     x1, y1, x2, y2 = box

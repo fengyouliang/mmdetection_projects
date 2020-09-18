@@ -1,4 +1,3 @@
-# TODO fail
 # fp16 = dict(loss_scale=512.)
 classes = ('knife', 'scissors', 'lighter', 'zippooil', 'pressure', 'slingshot', 'handcuffs', 'nailpolish', 'powerbank', 'firecrackers')
 num_classes = len(classes)

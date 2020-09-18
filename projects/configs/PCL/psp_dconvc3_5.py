@@ -1,5 +1,5 @@
 # model settings
-norm_cfg = dict(type='SyncBN', requires_grad=True)
+norm_cfg = dict(type='BN', requires_grad=True)
 model = dict(
     type='EncoderDecoder',
     pretrained=None,
@@ -12,6 +12,8 @@ model = dict(
         strides=(1, 2, 1, 1),
         norm_cfg=norm_cfg,
         norm_eval=False,
+        dcn=dict(type='DCN', deform_groups=1, fallback_on_stride=False),
+        stage_with_dcn=(False, True, True, True),
         style='pytorch',
         contract_dilation=True),
     decode_head=dict(
@@ -120,7 +122,8 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = '/fengyouliang/pth/psp/pspnet_r50-d8_512x512_160k_ade20k_20200615_184358-1890b0bd.pth'
-resume_from = None
+# load_from = '/fengyouliang/pth/psp/pspnet_r50-d8_512x512_160k_ade20k_20200615_184358-1890b0bd.pth'
+load_from = None
+resume_from = '/fengyouliang/model_output/mmseg_work_dirs/PCL/psp_dconvc3_5/latest.pth'
 workflow = [('train', 1)]
 cudnn_benchmark = True

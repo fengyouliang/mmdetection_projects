@@ -46,7 +46,7 @@ test_cfg = dict(mode='whole')
 
 # dataset settings
 dataset_type = 'PCLDataset'
-data_root = '/fengyouliang/datasets/PCL/train'
+data_root = '/fengyouliang/datasets/PCL/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 image_size = (256, 256)
@@ -82,23 +82,22 @@ data = dict(
     train=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='image',
-        ann_dir='label_cvt',
-        split='split/train.txt',
+        img_dir='train/image',
+        ann_dir='train/label_cvt',
+        split='train/split/train.txt',
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='image',
-        ann_dir='label_cvt',
-        split='split/val.txt',
+        img_dir='train/image',
+        ann_dir='train/label_cvt',
+        split='train/split/val.txt',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='image',
-        ann_dir='label_cvt',
-        split='split/val.txt',
+        img_dir='test',
+        split='train/split/test.txt',
         pipeline=test_pipeline))
 
 # optimizer
@@ -108,7 +107,7 @@ optimizer_config = dict()
 lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
 # runtime settings
 total_iters = 160000
-checkpoint_config = dict(by_epoch=False, interval=160000)
+checkpoint_config = dict(by_epoch=False, interval=16000)
 evaluation = dict(interval=16000, metric='mIoU')
 
 # yapf:disable

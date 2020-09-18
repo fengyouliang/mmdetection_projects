@@ -2,15 +2,35 @@ import os.path as osp
 import pickle
 import shutil
 import tempfile
+from pathlib import Path
 
+import cv2 as cv
 import mmcv
+import numpy as np
 import torch
 import torch.distributed as dist
-from mmcv.image import tensor2imgs
 from mmcv.runner import get_dist_info
+from mmseg.core.evaluation import mean_iou
 
 
-def single_gpu_test(model, data_loader, show=False, out_dir=None):
+def get_gt_seg_maps(img_infos, reduce_zero_label=False):
+    """Get ground truth segmentation maps for evaluation."""
+    gt_seg_maps = []
+    for img_info in img_infos:
+        gt_seg_map = mmcv.imread(
+            img_info['ann']['seg_map'], flag='unchanged', backend='pillow')
+        if reduce_zero_label:
+            # avoid using underflow conversion
+            gt_seg_map[gt_seg_map == 0] = 255
+            gt_seg_map = gt_seg_map - 1
+            gt_seg_map[gt_seg_map == 254] = 255
+
+        gt_seg_maps.append(gt_seg_map)
+
+    return gt_seg_maps
+
+
+def single_gpu_test(model, data_loader, out_dir=None, show=False):
     """Test with single GPU.
 
     Args:
@@ -25,49 +45,33 @@ def single_gpu_test(model, data_loader, show=False, out_dir=None):
     """
 
     model.eval()
-    results = []
     dataset = data_loader.dataset
     prog_bar = mmcv.ProgressBar(len(dataset))
+
+    image_infos = dataset.img_infos
+    data_item_count = 0
+
     for i, data in enumerate(data_loader):
         with torch.no_grad():
             result = model(return_loss=False, **data)
-        if isinstance(result, list):
-            results.extend(result)
-        else:
-            results.append(result)
 
-        if show or out_dir:
-            img_tensor = data['img'][0]
-            img_metas = data['img_metas'][0].data[0]
-            imgs = tensor2imgs(img_tensor, **img_metas[0]['img_norm_cfg'])
-            assert len(imgs) == len(img_metas)
+        assert len(result) == data_loader.batch_size
 
-            for img, img_meta in zip(imgs, img_metas):
-                h, w, _ = img_meta['img_shape']
-                img_show = img[:h, :w, :]
+        for batch_idx, per_image_result in enumerate(result):
 
-                ori_h, ori_w = img_meta['ori_shape'][:-1]
-                img_show = mmcv.imresize(img_show, (ori_w, ori_h))
+            pred = np.zeros(per_image_result.shape, dtype=np.uint16)
+            for idx in range(8):
+                pred[per_image_result == idx] = (idx + 1) * 100
 
-                if out_dir:
-                    out_file = osp.join(out_dir, img_meta['ori_filename'])
-                else:
-                    out_file = None
+            image_path = image_infos[data_item_count]['filename']
+            out_file = f"{out_dir}/{Path(image_path).stem}.png"
+            cv.imwrite(out_file, pred)
 
-                model.module.show_result(
-                    img_show,
-                    result,
-                    palette=dataset.PALETTE,
-                    show=show,
-                    out_file=out_file)
-
-        batch_size = data['img'][0].size(0)
-        for _ in range(batch_size):
             prog_bar.update()
-    return results
+            data_item_count += 1
 
 
-def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
+def multi_gpu_test(model, data_loader, out_dir, tmpdir=None, gpu_collect=False):
     """Test model with multiple gpus.
 
     This method tests model with multiple gpus and collects the results
@@ -88,18 +92,31 @@ def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
     """
 
     model.eval()
-    results = []
     dataset = data_loader.dataset
+    prog_bar = mmcv.ProgressBar(len(dataset))
+
     rank, world_size = get_dist_info()
-    if rank == 0:
-        prog_bar = mmcv.ProgressBar(len(dataset))
+
+    image_infos = dataset.img_infos
+    data_item_count = 0
     for i, data in enumerate(data_loader):
         with torch.no_grad():
-            result = model(return_loss=False, rescale=True, **data)
-        if isinstance(result, list):
-            results.extend(result)
-        else:
-            results.append(result)
+            result = model(return_loss=False, **data)
+
+        assert len(result) == data_loader.batch_size
+
+        for batch_idx, per_image_result in enumerate(result):
+
+            pred = np.zeros(per_image_result.shape, dtype=np.uint16)
+            for idx in range(8):
+                pred[per_image_result == idx] = (idx + 1) * 100
+
+            image_path = image_infos[data_item_count]['filename']
+            out_file = f"{out_dir}/{Path(image_path).stem}.png"
+            cv.imwrite(out_file, pred)
+
+            prog_bar.update()
+            data_item_count += 1
 
         if rank == 0:
             batch_size = data['img'][0].size(0)
@@ -107,11 +124,12 @@ def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
                 prog_bar.update()
 
     # collect results from all ranks
-    if gpu_collect:
-        results = collect_results_gpu(results, len(dataset))
-    else:
-        results = collect_results_cpu(results, len(dataset), tmpdir)
-    return results
+    # if gpu_collect:
+    #     results = collect_results_gpu(results, len(dataset))
+    # else:
+    #     results = collect_results_cpu(results, len(dataset), tmpdir)
+    # return results
+    return
 
 
 def collect_results_cpu(result_part, size, tmpdir=None):
@@ -121,7 +139,7 @@ def collect_results_cpu(result_part, size, tmpdir=None):
     if tmpdir is None:
         MAX_LEN = 512
         # 32 is whitespace
-        dir_tensor = torch.full((MAX_LEN, ),
+        dir_tensor = torch.full((MAX_LEN,),
                                 32,
                                 dtype=torch.uint8,
                                 device='cuda')

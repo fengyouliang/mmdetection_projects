@@ -2,7 +2,7 @@
 norm_cfg = dict(type='SyncBN', requires_grad=True)
 model = dict(
     type='EncoderDecoder',
-    pretrained=None,
+    pretrained='/fengyouliang/pth/backbone/resnet_x/resnet50_v1c-2cccc1ad.pth',
     backbone=dict(
         type='ResNetV1c',
         depth=50,
@@ -15,11 +15,11 @@ model = dict(
         style='pytorch',
         contract_dilation=True),
     decode_head=dict(
-        type='PSPHead',
+        type='DAHead',
         in_channels=2048,
         in_index=3,
         channels=512,
-        pool_scales=(1, 2, 3, 6),
+        pam_channels=64,
         dropout_ratio=0.1,
         num_classes=8,
         norm_cfg=norm_cfg,
@@ -97,7 +97,7 @@ data = dict(
         type=dataset_type,
         data_root=data_root,
         img_dir='test',
-        split='train/split/test/test_1.txt',
+        split='train/split/test.txt',
         pipeline=test_pipeline))
 
 # optimizer
@@ -107,7 +107,7 @@ optimizer_config = dict()
 lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
 # runtime settings
 total_iters = 160000
-checkpoint_config = dict(by_epoch=False, interval=160000)
+checkpoint_config = dict(by_epoch=False, interval=16000)
 evaluation = dict(interval=16000, metric='mIoU')
 
 # yapf:disable
@@ -120,7 +120,7 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = '/fengyouliang/pth/psp/pspnet_r50-d8_512x512_160k_ade20k_20200615_184358-1890b0bd.pth'
+load_from = None
 resume_from = None
 workflow = [('train', 1)]
 cudnn_benchmark = True

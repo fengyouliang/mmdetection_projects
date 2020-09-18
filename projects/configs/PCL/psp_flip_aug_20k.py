@@ -43,6 +43,17 @@ model = dict(
 train_cfg = dict()
 test_cfg = dict(mode='whole')
 
+albu_train_transforms = [
+    dict(
+        type='Cutout',
+        num_holes=20,
+        max_h_size=16,
+        max_w_size=16,
+        fill_value=255,
+        p=0.5
+    ),
+
+]
 
 # dataset settings
 dataset_type = 'PCLDataset'
@@ -53,6 +64,22 @@ image_size = (256, 256)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', ),  # imdecode_backend='cv2'
+    dict(
+        type='Albu',
+        transforms=albu_train_transforms,
+        bbox_params=dict(
+            type='BboxParams',
+            format='pascal_voc',
+            label_fields=['gt_labels'],
+            min_visibility=0.0,
+            filter_lost_elements=True),
+        keymap={
+            'img': 'image',
+            # 'gt_masks': 'masks',
+            'gt_bboxes': 'bboxes'
+        },
+        update_pad_shape=False,
+        skip_img_without_anno=True),
     dict(type='Resize', img_scale=image_size, multiscale_mode="value"),
     dict(type='RandomFlip', flip_ratio=0.5, direction='horizontal'),
     dict(type='RandomFlip', flip_ratio=0.5, direction='vertical'),

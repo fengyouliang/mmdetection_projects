@@ -3,7 +3,7 @@
 import glob
 import os
 from pathlib import Path
-
+import pickle
 import cv2 as cv
 import numpy as np
 from PIL import Image
@@ -63,29 +63,58 @@ def check_cvt():
         print()
 
 
+def check_dist_test():
+    result_path = '/workspace/projects/submission/PCL/psp_dist_test.pkl'
+    with open(result_path, 'rb') as fp:
+        results = pickle.load(fp)
+    print()
+
+
 def gen_split():
     image_path = '/fengyouliang/datasets/PCL/train/image'
     all_images = glob.glob(f"{image_path}/*.tif")
+    all_test_images = glob.glob(f"/fengyouliang/datasets/PCL/test/*.tif")
     train_set, val_set = train_test_split(all_images, test_size=0.05)
 
     train_name = [Path(item).stem for item in train_set]
     val_name = [Path(item).stem for item in val_set]
+    test_name = [Path(item).stem for item in all_test_images]
 
     train_name = sorted(train_name, key=len)
     val_name = sorted(val_name, key=len)
-    # train_name.sort()
-    # val_name.sort()
+    test_name = sorted(test_name, key=len)
 
-    train_txt = '/fengyouliang/datasets/PCL/train/split/train.txt'
-    val_txt = '/fengyouliang/datasets/PCL/train/split/val.txt'
+    # train_txt = '/fengyouliang/datasets/PCL/train/split/train.txt'
+    # val_txt = '/fengyouliang/datasets/PCL/train/split/val.txt'
+    test_txt = '/fengyouliang/datasets/PCL/train/split/test.txt'
 
-    with open(train_txt,  'w', encoding='utf-8') as f:
-        f.write('\n'.join(train_name))
+    # with open(train_txt,  'w', encoding='utf-8') as f:
+    #     f.write('\n'.join(train_name))
+    #
+    # with open(val_txt,  'w', encoding='utf-8') as f:
+    #     f.write('\n'.join(val_name))
 
-    with open(val_txt,  'w', encoding='utf-8') as f:
-        f.write('\n'.join(val_name))
+    with open(test_txt,  'w', encoding='utf-8') as f:
+        f.write('\n'.join(test_name))
+
+
+def gen_test_split():
+    all_test_images = glob.glob(f"/fengyouliang/datasets/PCL/test/*.tif")
+    test_name = [Path(item).stem for item in all_test_images]
+    test_name = sorted(test_name, key=len)
+
+    batch_size = 50000
+    count = 0
+    for i in range(0, len(test_name), batch_size):
+        batch_name = test_name[i: i + batch_size]
+        test_txt = f'/fengyouliang/datasets/PCL/train/split/test/test_{count}.txt'
+        Path(test_txt).parent.mkdir(exist_ok=True)
+        count += 1
+        with open(test_txt,  'w', encoding='utf-8') as f:
+            f.write('\n'.join(batch_name))
 
 
 if __name__ == '__main__':
-    run_cvt()
-    # gen_split()
+    # run_cvt()
+    # check_dist_test()
+    gen_test_split()

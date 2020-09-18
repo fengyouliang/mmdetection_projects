@@ -1,39 +1,37 @@
-import module
-from mmdet.datasets import build_dataset, build_dataloader
+import mmseg_module
+from mmseg.datasets import build_dataset, build_dataloader
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2 as cv
 
-classes = ('knife', 'scissors', 'lighter', 'zippooil', 'pressure', 'slingshot', 'handcuffs', 'nailpolish', 'powerbank', 'firecrackers')
-dataset_type = 'Mosaic_CocoDataset'
-# dataset_type = 'CocoDataset'
-data_root = '/fengyouliang/datasets/x-ray/coco/'
+# dataset settings
+dataset_type = 'PCLMosaicDataset'
+data_root = '/fengyouliang/datasets/PCL/'
+
 img_norm_cfg = dict(
-    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+    mean=[0, 0, 0], std=[1, 1, 1], to_rgb=True)
+image_size = (256, 256)
 train_pipeline = [
-    # dict(type='LoadImageFromFile'),
-    # dict(type='LoadAnnotations', with_bbox=True),
-
-    dict(type='LoadMosaicImageAndAnnotations', image_shape=512, not_m_size=(1333, 800)),
-    dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),
+    dict(type='LoadMosaicImageAndAnnotations', mosaic_size=image_size, center=0.5, center_range=0.2),
+    dict(type='Resize', img_scale=image_size, multiscale_mode="value"),
     dict(type='RandomFlip', flip_ratio=0.5),
-    # dict(type='Normalize', **img_norm_cfg),
-    dict(type='Pad', size_divisor=32),
+    dict(type='PhotoMetricDistortion'),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='Pad', size=image_size, pad_val=0, seg_pad_val=255),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels']),
+    dict(type='Collect', keys=['img', 'gt_semantic_seg']),
 ]
-
 data = dict(
     samples_per_gpu=2,
     workers_per_gpu=0,
     train=dict(
         type=dataset_type,
-        classes=classes,
-        ann_file=data_root + 'annotations/fold0/train.json',
-        img_prefix=data_root + 'images/',
-        pipeline=train_pipeline,
-        mosaic_ratio=0.5,
-    )
+        data_root=data_root,
+        img_dir='train/image',
+        ann_dir='train/label_cvt',
+        split='train/split/val_mini.txt',
+        mosaic_ratio=1,
+        pipeline=train_pipeline),
 )
 
 dataset = [build_dataset(data['train'])]
@@ -53,22 +51,18 @@ data_loader = data_loaders[0]
 
 data_per_batch = iter(data_loader).__next__()
 
+img_metas = data_per_batch['img_metas']
+img_metas_data = img_metas.data[0]
 
 images = data_per_batch['img'].data[0].numpy()
-bboxes = data_per_batch['gt_bboxes'].data[0]
-labels = data_per_batch['gt_labels'].data[0]
+labels = data_per_batch['gt_semantic_seg'].data[0]
 
-for image, bbox, label in zip(images, bboxes, labels):
+for image, label, data_info in zip(images, labels, img_metas_data):
     image = image.transpose(1, 2, 0)
-    plt.imshow(image)
-    plt.text(0, 1, f"{image.shape[0]} - {image.shape[1]}")
-
-    for _box, _label in zip(bbox, label):
-        x1, y1, x2, y2 = _box
-        label_name = classes[_label.data]
-        plt.gca().add_patch(plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor='r', linewidth=1))
-        plt.text((x1 + x2) / 2, (y1 + y2) / 2, str(label_name))
-
+    label = label.squeeze()
+    plt.imshow(image / 255)
+    plt.show()
+    plt.imshow(label)
     plt.show()
 
 print(data_loader)

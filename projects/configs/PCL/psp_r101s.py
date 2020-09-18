@@ -1,12 +1,16 @@
 # model settings
-norm_cfg = dict(type='SyncBN', requires_grad=True)
+norm_cfg = dict(type='BN', requires_grad=True)
 model = dict(
     type='EncoderDecoder',
-    pretrained=None,
+    pretrained='open-mmlab://resnest101',
     backbone=dict(
-        type='ResNetV1c',
-        depth=50,
+        type='ResNeSt',
+        depth=101,
         num_stages=4,
+        stem_channels=128,
+        radix=2,
+        reduction_factor=4,
+        avg_down_stride=True,
         out_indices=(0, 1, 2, 3),
         dilations=(1, 1, 2, 4),
         strides=(1, 2, 1, 1),
@@ -102,13 +106,14 @@ data = dict(
 
 # optimizer
 optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005)
-optimizer_config = dict()
+# optimizer_config = dict()
+optimizer_config = dict(type='Fp16OptimizerHook', loss_scale=512., distributed=False)
 # learning policy
 lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
 # runtime settings
-total_iters = 160000
-checkpoint_config = dict(by_epoch=False, interval=16000)
-evaluation = dict(interval=16000, metric='mIoU')
+total_iters = 20000
+checkpoint_config = dict(by_epoch=False, interval=2000)
+evaluation = dict(interval=2000, metric='mIoU')
 
 # yapf:disable
 log_config = dict(

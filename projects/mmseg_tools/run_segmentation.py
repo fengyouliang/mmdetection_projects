@@ -4,7 +4,7 @@ import os
 import os.path as osp
 import time
 
-available_gpu_ids = [0]
+available_gpu_ids = [3]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 # demo config
@@ -13,6 +13,18 @@ config_path = '../configs/PCL/fcn_demo.py'
 # config
 # config_path = '../configs/PCL/fcn.py'
 # config_path = '../configs/PCL/ocrnet.py'
+# config_path = '../configs/PCL/psp_dconvc3_5.py'
+# config_path = '../configs/PCL/deeplabv3p.py'
+# config_path = '../configs/PCL/deeplabv3p_t0_single_gpu_reproduce.py'
+# config_path = '../configs/PCL/deeplabv3p_t0_pretrain.py'
+# config_path = '../configs/PCL/deeplabv3p_t01_pretrain.py'
+# config_path = '../configs/PCL/psp_r101s.py'
+# config_path = '../configs/PCL/psp_mstrain.py'
+
+# PCL 20k
+# config_path = '../configs/PCL/psp_20k.py'
+# config_path = '../configs/PCL/psp_flip_20k.py'
+
 
 import mmcv
 import torch
@@ -21,6 +33,7 @@ from mmcv.utils import Config, DictAction, get_git_hash
 
 from mmseg import __version__
 from mmseg.apis import set_random_seed, train_segmentor
+# from mmseg_module.apis import set_random_seed, train_segmentor
 from mmseg.datasets import build_dataset
 from mmseg.models import build_segmentor
 from mmseg.utils import collect_env, get_root_logger

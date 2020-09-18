@@ -27,7 +27,9 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+        sampler=dict(type='OHEMPixelSampler', thresh=0.7, min_kept=100000),
+    ),
     auxiliary_head=dict(
         type='FCNHead',
         in_channels=1024,
@@ -127,7 +129,8 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = '/fengyouliang/pth/deeplabv3p/deeplabv3plus_r50-d8_512x512_160k_ade20k_20200615_124504-6135c7e0.pth'
-resume_from = None
+# load_from = '/fengyouliang/pth/deeplabv3p/deeplabv3plus_r50-d8_512x512_160k_ade20k_20200615_124504-6135c7e0.pth'
+load_from = None
+resume_from = '/fengyouliang/model_output/mmseg_work_dirs/PCL/deeplabv3p_t01_pretrain/latest.pth'
 workflow = [('train', 1)]
 cudnn_benchmark = True

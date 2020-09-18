@@ -50,14 +50,16 @@ data_root = '/fengyouliang/datasets/PCL/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 image_size = (256, 256)
+crop_size = (256, 256)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', ),  # imdecode_backend='cv2'
-    dict(type='Resize', img_scale=image_size, multiscale_mode="value"),
+    dict(type='Resize', img_scale=image_size, ratio_range=(0.5, 2.0)),  # multiscale_mode="value"
+    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=1),
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='PhotoMetricDistortion'),
     dict(type='Normalize', **img_norm_cfg),
-    dict(type='Pad', size=image_size, pad_val=0, seg_pad_val=255),
+    dict(type='Pad', size=crop_size, pad_val=0, seg_pad_val=255),
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['img', 'gt_semantic_seg']),
 ]

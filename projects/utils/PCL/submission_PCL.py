@@ -1,5 +1,6 @@
 import glob
 import os
+import pickle
 from pathlib import Path
 import cv2 as cv
 import numpy as np
@@ -69,6 +70,34 @@ def check_submission():
         print()
 
 
+def cvt_pkl_result(model_type, pkl_path):
+    pkl_idx = int(pkl_path.split('/')[-1].split('_')[-1][0])
+
+    print(f'loading pkl in {pkl_path}')
+    with open(pkl_path, 'rb') as fp:
+        results = pickle.load(fp)
+    print('loading done!')
+
+    test_split_path = f'/fengyouliang/datasets/PCL/train/split/test/test_{pkl_idx}.txt'
+    with open(test_split_path, 'r', encoding='utf-8') as fp:
+        test_image_ids = fp.readlines()
+    test_image_ids = [item.strip() for item in test_image_ids]
+
+    pbar = tqdm(enumerate(results), total=len(test_image_ids))
+    for cur_image_id, image_result in pbar:
+        pbar.set_description(test_image_ids[cur_image_id])
+        pred = np.zeros(image_result.shape, dtype=np.uint16)
+
+        for idx, match in enumerate(opt.matches):
+            pred[image_result == match] = (idx + 1) * 100
+
+        save_path = f'../../submission/PCL/{model_type}_dist_test/results'
+        os.makedirs(save_path, exist_ok=True)
+
+        out_file = f"{save_path}/{test_image_ids[cur_image_id]}.png"
+        cv.imwrite(out_file, pred)
+
+
 def main():
     model_path = '/fengyouliang/model_output/mmseg_work_dirs/PCL/ocrnet_dist'
     run_submission(model_path, epoch_name='latest')
@@ -78,3 +107,6 @@ if __name__ == '__main__':
     main()
     # cd submission/project/model_type
     # zip -r results.zip results/
+
+    # cvt_pkl_result('psp', pkl_path='/workspace/projects/submission/PCL/psp/pkl/psp_dist_test_1.pkl')
+    # print(len(os.listdir('/workspace/projects/submission/PCL/psp_dist_test/results')))

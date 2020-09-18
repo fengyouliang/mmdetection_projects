@@ -257,8 +257,8 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[16, 22])
-total_epochs = 24
+    step=[32, 44])
+total_epochs = 48
 
 checkpoint_config = dict(interval=1)
 # yapf:disable

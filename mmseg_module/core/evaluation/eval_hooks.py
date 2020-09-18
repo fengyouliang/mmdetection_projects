@@ -3,6 +3,8 @@ import os.path as osp
 from mmcv.runner import Hook
 from torch.utils.data import DataLoader
 
+from mmseg_module.apis import single_gpu_test, multi_gpu_test
+
 
 class EvalHook(Hook):
     """Evaluation hook.
@@ -24,7 +26,7 @@ class EvalHook(Hook):
         """After train epoch hook."""
         if not self.every_n_iters(runner, self.interval):
             return
-        from mmseg.apis import single_gpu_test
+        # from mmseg.apis import single_gpu_test
         runner.log_buffer.clear()
         results = single_gpu_test(runner.model, self.dataloader, show=False)
         self.evaluate(runner, results)
@@ -68,7 +70,7 @@ class DistEvalHook(EvalHook):
         """After train epoch hook."""
         if not self.every_n_iters(runner, self.interval):
             return
-        from mmseg.apis import multi_gpu_test
+        # from mmseg.apis import multi_gpu_test
         runner.log_buffer.clear()
         results = multi_gpu_test(
             runner.model,

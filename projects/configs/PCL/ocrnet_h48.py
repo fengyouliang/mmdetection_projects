@@ -3,7 +3,7 @@ norm_cfg = dict(type='BN', requires_grad=True)
 model = dict(
     type='CascadeEncoderDecoder',
     num_stages=2,
-    pretrained='open-mmlab://msra/hrnetv2_w18',
+    pretrained=None,
     backbone=dict(
         type='HRNet',
         norm_cfg=norm_cfg,
@@ -20,24 +20,24 @@ model = dict(
                 num_branches=2,
                 block='BASIC',
                 num_blocks=(4, 4),
-                num_channels=(18, 36)),
+                num_channels=(48, 96)),
             stage3=dict(
                 num_modules=4,
                 num_branches=3,
                 block='BASIC',
                 num_blocks=(4, 4, 4),
-                num_channels=(18, 36, 72)),
+                num_channels=(48, 96, 192)),
             stage4=dict(
                 num_modules=3,
                 num_branches=4,
                 block='BASIC',
                 num_blocks=(4, 4, 4, 4),
-                num_channels=(18, 36, 72, 144)))),
+                num_channels=(48, 96, 192, 384)))),
     decode_head=[
         dict(
             type='FCNHead',
-            in_channels=[18, 36, 72, 144],
-            channels=sum([18, 36, 72, 144]),
+            in_channels=[48, 96, 192, 384],
+            channels=sum([48, 96, 192, 384]),
             in_index=(0, 1, 2, 3),
             input_transform='resize_concat',
             kernel_size=1,
@@ -51,7 +51,7 @@ model = dict(
                 type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)),
         dict(
             type='OCRHead',
-            in_channels=[18, 36, 72, 144],
+            in_channels=[48, 96, 192, 384],
             in_index=(0, 1, 2, 3),
             input_transform='resize_concat',
             channels=512,
@@ -127,6 +127,8 @@ data = dict(
 # optimizer
 optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005)
 optimizer_config = dict()
+# optimizer_config = dict(type='Fp16OptimizerHook', loss_scale=512.)
+
 # learning policy
 lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
 # runtime settings
@@ -144,7 +146,7 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
+load_from = '/fengyouliang/pth/ocr/ocrnet_hr48_512x512_160k_ade20k_20200615_184705-a073726d.pth'
 resume_from = None
 workflow = [('train', 1)]
 cudnn_benchmark = True

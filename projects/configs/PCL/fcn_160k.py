@@ -48,7 +48,7 @@ test_cfg = dict(mode='whole')
 
 # dataset settings
 dataset_type = 'PCLDataset'
-data_root = '/fengyouliang/datasets/PCL/train'
+data_root = '/fengyouliang/datasets/PCL/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 image_size = (256, 256)
@@ -79,28 +79,27 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=16,
     workers_per_gpu=0,
     train=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='image',
-        ann_dir='label_cvt',
-        split='split/train.txt',
+        img_dir='train/image',
+        ann_dir='train/label_cvt',
+        split='train/split/train.txt',
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='image',
-        ann_dir='label_cvt',
-        split='split/val.txt',
+        img_dir='train/image',
+        ann_dir='train/label_cvt',
+        split='train/split/val.txt',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='image',
-        ann_dir='label_cvt',
-        split='split/val.txt',
+        img_dir='test',
+        split='train/split/test.txt',
         pipeline=test_pipeline))
 
 # optimizer

@@ -54,7 +54,8 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', ),  # imdecode_backend='cv2'
     dict(type='Resize', img_scale=image_size, multiscale_mode="value"),
-    dict(type='RandomFlip', flip_ratio=0.5),
+    dict(type='RandomFlip', flip_ratio=0.5, direction='horizontal'),
+    dict(type='RandomFlip', flip_ratio=0.5, direction='vertical'),
     dict(type='PhotoMetricDistortion'),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size=image_size, pad_val=0, seg_pad_val=255),
@@ -66,8 +67,8 @@ test_pipeline = [
     dict(
         type='MultiScaleFlipAug',
         img_scale=image_size,
-        # img_ratios=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
-        flip=False,
+        img_ratios=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
+        flip=True,
         transforms=[
             dict(type='Resize', keep_ratio=True),
             dict(type='RandomFlip'),
@@ -105,6 +106,10 @@ optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005)
 optimizer_config = dict()
 # learning policy
 lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
+# warmup = 'linear',
+# warmup_iters = 500,
+# warmup_ratio = 0.001,
+
 # runtime settings
 total_iters = 20000
 checkpoint_config = dict(by_epoch=False, interval=2000)

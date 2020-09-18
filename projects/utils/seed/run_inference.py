@@ -11,7 +11,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids))
 
 def main():
     model_path = '/fengyouliang/model_output/mmdet_work_dirs/seed/base_cascade_r101_dcn'
-    run_submission(model_path, epoch_name='epoch_10')
+    run_submission(model_path, epoch_name='epoch_12')
 
 
 def run_submission(model_path, epoch_name='latest'):
@@ -19,7 +19,7 @@ def run_submission(model_path, epoch_name='latest'):
     model_type = model_path.split('/')[-1]
 
     config_file = f'../../configs/{project_type}/{model_type}.py'
-    checkpoint_file = f'/fengyouliang/model_output/work_dirs/{project_type}/{model_type}/{epoch_name}.pth'
+    checkpoint_file = f'/fengyouliang/model_output/mmdet_work_dirs/{project_type}/{model_type}/{epoch_name}.pth'
 
     assert os.path.isfile(config_file), config_file
     assert os.path.isfile(checkpoint_file), checkpoint_file

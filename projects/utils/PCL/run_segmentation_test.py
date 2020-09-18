@@ -66,11 +66,13 @@ def parse_args():
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument('--samples_per_gpu', type=int)
 
+    model_type = 'psp'
     settings = [
-        '/workspace/projects/configs/PCL/fcn_160k.py',
-        '/fengyouliang/model_output/mmseg_work_dirs/PCL/fcn_160k/latest.pth',
-        '--out', '/workspace/projects/submission/PCL/fcn_demo/results',
+        f'/workspace/projects/configs/PCL/{model_type}.py',  # config
+        f'/fengyouliang/model_output/mmseg_work_dirs/PCL/{model_type}/latest.pth',  # checkpoint
+        '--out', f'/workspace/projects/submission/PCL/{model_type}_mstest/results',  # save
         '--samples_per_gpu', '100',
+        # '--aug-test'
     ]
 
     args = parser.parse_args(settings)

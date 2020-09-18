@@ -126,7 +126,7 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
+load_from = '/fengyouliang/pth/psp/pspnet_r50-d8_512x512_160k_ade20k_20200615_184358-1890b0bd.pth'
 resume_from = None
 workflow = [('train', 1)]
 cudnn_benchmark = True

@@ -4,7 +4,11 @@ model = dict(
     type='EncoderDecoder',
     pretrained=None,
     backbone=dict(
-        type='ResNetV1c',
+        type='ResNeSt',
+        stem_channels=128,
+        radix=2,
+        reduction_factor=4,
+        avg_down_stride=True,
         depth=50,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
@@ -126,7 +130,7 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
+load_from = '/fengyouliang/pth/psp/pspnet_r50-d8_512x512_160k_ade20k_20200615_184358-1890b0bd.pth'
 resume_from = None
 workflow = [('train', 1)]
 cudnn_benchmark = True

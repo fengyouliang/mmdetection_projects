@@ -5,7 +5,8 @@ import torch
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import IterBasedRunner, build_optimizer
 
-from mmseg.core import DistEvalHook, EvalHook
+# from mmseg.core import DistEvalHook, EvalHook
+from mmseg_module.core import DistEvalHook, EvalHook
 from mmseg.datasets import build_dataloader, build_dataset
 from mmseg.utils import get_root_logger
 
@@ -91,7 +92,7 @@ def train_segmentor(model,
         val_dataset = build_dataset(cfg.data.val, dict(test_mode=True))
         val_dataloader = build_dataloader(
             val_dataset,
-            samples_per_gpu=1,
+            samples_per_gpu=4,
             workers_per_gpu=cfg.data.workers_per_gpu,
             dist=distributed,
             shuffle=False)
