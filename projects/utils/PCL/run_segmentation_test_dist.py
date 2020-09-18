@@ -1,7 +1,7 @@
 import argparse
 import os
 
-available_gpu_ids = [2, 3]
+available_gpu_ids = [1, 2]
 os.environ['CUDA_VISIBLE_DEVICES'] = ', '.join(list(map(str, available_gpu_ids)))
 
 import mmcv
@@ -11,8 +11,13 @@ from mmcv.runner import get_dist_info, init_dist, load_checkpoint
 from mmcv.utils import DictAction
 
 from mmseg.apis import multi_gpu_test, single_gpu_test
+# from mmseg_module.apis import multi_gpu_test, single_gpu_test
 from mmseg.datasets import build_dataloader, build_dataset
 from mmseg.models import build_segmentor
+
+import sys
+sys.path.append('/workspace')
+import mmseg_module
 
 
 def parse_args():
@@ -59,7 +64,14 @@ def parse_args():
         default='none',
         help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
-    args = parser.parse_args()
+
+    settings = [
+        '/workspace/projects/configs/PCL/ocrnet_dist.py',
+        '/fengyouliang/model_output/mmseg_work_dirs/PCL/ocrnet_dist/latest.pth',
+        '--out', '/workspace/projects/submission/PCL/demo/demo.pkl',
+    ]
+
+    args = parser.parse_args(settings)
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
     return args
