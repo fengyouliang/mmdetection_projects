@@ -33,26 +33,24 @@ class LoadMosaicImageAndAnnotations(object):
         self.reduce_zero_label = reduce_zero_label
 
     def __call__(self, results):
-        assert isinstance(results, list)
-        if len(results) == 4:
+        if isinstance(results, list) and len(results) == 4:
             return self._load_mosaic_img_ann(results)
-        elif len(results) == 1:
+        elif isinstance(results, dict):
             return self._load_img_ann(results)
         else:
-            raise ValueError(f"results length: {len(results)} should be 1 or 4")
+            raise ValueError(f"results type: {type(results)} should be list or dict")
 
     def _load_img_ann(self, results):
         # load image
-        file_client = mmcv.FileClient(**self.file_client_args)
+        file_client_img = mmcv.FileClient(**self.file_client_args.copy())
 
         if results.get('img_prefix') is not None:
             filename = osp.join(results['img_prefix'],
                                 results['img_info']['filename'])
         else:
             filename = results['img_info']['filename']
-        img_bytes = file_client.get(filename)
-        img = mmcv.imfrombytes(
-            img_bytes, flag=self.color_type, backend=self.img_imdecode_backend)
+        img_bytes = file_client_img.get(filename)
+        img = mmcv.imfrombytes(img_bytes, flag=self.color_type, backend=self.img_imdecode_backend)
         if self.to_float32:
             img = img.astype(np.float32)
 
@@ -71,14 +69,14 @@ class LoadMosaicImageAndAnnotations(object):
             to_rgb=False)
 
         # load annotation
-        file_client = mmcv.FileClient(**self.file_client_args)
+        file_client_ann = mmcv.FileClient(**self.file_client_args.copy())
 
         if results.get('seg_prefix', None) is not None:
             filename = osp.join(results['seg_prefix'],
                                 results['ann_info']['seg_map'])
         else:
             filename = results['ann_info']['seg_map']
-        img_bytes = file_client.get(filename)
+        img_bytes = file_client_ann.get(filename)
         gt_semantic_seg = mmcv.imfrombytes(
             img_bytes, flag='unchanged',
             backend=self.ann_imdecode_backend).squeeze().astype(np.uint8)

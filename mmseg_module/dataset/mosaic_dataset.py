@@ -65,6 +65,7 @@ class MosaicCustomDataset(Dataset):
     PALETTE = None
 
     def __init__(self,
+                 mosaic_ratio,
                  pipeline,
                  img_dir,
                  img_suffix='.jpg',
@@ -74,8 +75,7 @@ class MosaicCustomDataset(Dataset):
                  data_root=None,
                  test_mode=False,
                  ignore_index=255,
-                 reduce_zero_label=False,
-                 mosaic_ratio=1):
+                 reduce_zero_label=False,):
         self.pipeline = Compose(pipeline)
         self.img_dir = img_dir
         self.img_suffix = img_suffix
@@ -210,7 +210,7 @@ class MosaicCustomDataset(Dataset):
             ann_info = self.get_ann_info(idx)
             results = dict(img_info=img_info, ann_info=ann_info)
             self.pre_pipeline(results)
-            final_results.append(results)
+            final_results = results
 
         return self.pipeline(final_results)
 
